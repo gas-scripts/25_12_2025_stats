@@ -28,29 +28,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import cleanup from 'rollup-plugin-cleanup';
-import license from 'rollup-plugin-license';
-import prettier from 'rollup-plugin-prettier';
-import typescript from 'rollup-plugin-typescript2';
-import { fileURLToPath } from 'url';
-
-export default {
-  input: 'src/index.ts',
-  output: {
-    dir: 'dist',
-    format: 'esm',
-  },
-  plugins: [
-    cleanup({ comments: 'none', extensions: ['.ts'] }),
-    license({
-      banner: {
-        content: {
-          file: fileURLToPath(new URL('license-header.txt', import.meta.url)),
-        },
-      },
-    }),
-    typescript(),
-    prettier({ parser: 'typescript' }),
-  ],
-  context: 'this',
+type Order = {
+  date: string;
+  lastChangeDate: string;
+  warehouseName: string;
+  warehouseType: string;
+  countryName: string;
+  oblastOkrugName: string;
+  regionName: string;
+  supplierArticle: string;
+  nmId: number;
+  barcode: string;
+  category: string;
+  subject: string;
+  brand: string;
+  techSize: string;
+  incomeID: number;
+  isSupply: boolean;
+  isRealization: boolean;
+  totalPrice: number;
+  discountPercent: number;
+  spp: number;
+  finishedPrice: number;
+  priceWithDisc: number;
+  isCancel: boolean;
+  cancelDate?: string;
+  sticker: string;
+  gNumber: string;
+  srid: string;
 };

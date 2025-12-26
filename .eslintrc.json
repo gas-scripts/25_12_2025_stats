@@ -4,7 +4,7 @@
     "node": true,
     "es2020": true
   },
-  "extends": ["./node_modules/gts", "prettier"],
+  "extends": ["prettier"],
   "overrides": [],
   "parserOptions": {
     "ecmaVersion": "latest",

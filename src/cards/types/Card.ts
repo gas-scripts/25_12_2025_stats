@@ -28,29 +28,51 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import cleanup from 'rollup-plugin-cleanup';
-import license from 'rollup-plugin-license';
-import prettier from 'rollup-plugin-prettier';
-import typescript from 'rollup-plugin-typescript2';
-import { fileURLToPath } from 'url';
-
-export default {
-  input: 'src/index.ts',
-  output: {
-    dir: 'dist',
-    format: 'esm',
-  },
-  plugins: [
-    cleanup({ comments: 'none', extensions: ['.ts'] }),
-    license({
-      banner: {
-        content: {
-          file: fileURLToPath(new URL('license-header.txt', import.meta.url)),
-        },
-      },
-    }),
-    typescript(),
-    prettier({ parser: 'typescript' }),
-  ],
-  context: 'this',
+type Card = {
+  nmID: number;
+  imtID: number;
+  nmUUID: string;
+  subjectID: number;
+  subjectName: string;
+  vendorCode: string;
+  brand: string;
+  title: string;
+  description: string;
+  needKiz: boolean;
+  photos: Array<{
+    big: string;
+    c246x328: string;
+    c516x688: string;
+    square: string;
+    tm: string;
+  }>;
+  video?: string;
+  wholesale: {
+    enabled: boolean;
+    quantum: number;
+  };
+  dimensions: {
+    length: number;
+    width: number;
+    height: number;
+    weightBrutto: number;
+    isValid: boolean;
+  };
+  characteristics: Array<{
+    id: number;
+    name: string;
+    value: string[];
+  }>;
+  sizes: Array<{
+    chrtID: number;
+    techSize: string;
+    skus: string[];
+  }>;
+  tags: Array<{
+    id: number;
+    name: string;
+    color: string;
+  }>;
+  createdAt: string;
+  updatedAt: string;
 };

@@ -28,29 +28,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import cleanup from 'rollup-plugin-cleanup';
-import license from 'rollup-plugin-license';
-import prettier from 'rollup-plugin-prettier';
-import typescript from 'rollup-plugin-typescript2';
-import { fileURLToPath } from 'url';
-
-export default {
-  input: 'src/index.ts',
-  output: {
-    dir: 'dist',
-    format: 'esm',
-  },
-  plugins: [
-    cleanup({ comments: 'none', extensions: ['.ts'] }),
-    license({
-      banner: {
-        content: {
-          file: fileURLToPath(new URL('license-header.txt', import.meta.url)),
-        },
-      },
-    }),
-    typescript(),
-    prettier({ parser: 'typescript' }),
-  ],
-  context: 'this',
-};
+export const SETTINGS_SHEET_NAME = 'wbapi | Настройки';
+export const ORDERS_SHEET_NAME = 'wbapi | Заказы';
+export const SALES_SHEET_NAME = 'wbapi | Продажи';
+export const STOCKS_SHEET_NAME = 'wbapi | Остатки';
+export const FUNNEL_SHEET_NAME = 'wbapi | Статистика Воронок';
+export const ADVERT_SHEET_NAME = 'wbapi | Статистика Рекламы';

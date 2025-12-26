@@ -28,29 +28,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import cleanup from 'rollup-plugin-cleanup';
-import license from 'rollup-plugin-license';
-import prettier from 'rollup-plugin-prettier';
-import typescript from 'rollup-plugin-typescript2';
-import { fileURLToPath } from 'url';
+import { SALES_SHEET_NAME } from '../sheets';
 
-export default {
-  input: 'src/index.ts',
-  output: {
-    dir: 'dist',
-    format: 'esm',
-  },
-  plugins: [
-    cleanup({ comments: 'none', extensions: ['.ts'] }),
-    license({
-      banner: {
-        content: {
-          file: fileURLToPath(new URL('license-header.txt', import.meta.url)),
-        },
-      },
-    }),
-    typescript(),
-    prettier({ parser: 'typescript' }),
-  ],
-  context: 'this',
-};
+export default function (sales: Sale[]) {
+  const sheet =
+    SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SALES_SHEET_NAME) ||
+    SpreadsheetApp.getActiveSpreadsheet().insertSheet(SALES_SHEET_NAME);
+
+  let headers: string[] = [];
+
+  if (sheet.getLastColumn() > 0)
+    headers = sheet
+      .getRange(1, 1, 1, sheet.getLastColumn())
+      .getValues()[0] as string[];
+  if (!headers[0] || typeof headers[0] !== 'string') {
+    sheet.clear();
+    headers = Object.keys(sales[0]);
+  }
+
+  sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+  sheet
+    .getRange(sheet.getLastRow() + 1, 1, sales.length, headers.length)
+    .setValues(
+      sales.map(sale => headers.map(header => sale[header as keyof Sale]))
+    );
+}

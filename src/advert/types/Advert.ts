@@ -28,29 +28,45 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import cleanup from 'rollup-plugin-cleanup';
-import license from 'rollup-plugin-license';
-import prettier from 'rollup-plugin-prettier';
-import typescript from 'rollup-plugin-typescript2';
-import { fileURLToPath } from 'url';
+type BidsKopecks = {
+  recommendations: number;
+  search: number;
+};
 
-export default {
-  input: 'src/index.ts',
-  output: {
-    dir: 'dist',
-    format: 'esm',
-  },
-  plugins: [
-    cleanup({ comments: 'none', extensions: ['.ts'] }),
-    license({
-      banner: {
-        content: {
-          file: fileURLToPath(new URL('license-header.txt', import.meta.url)),
-        },
-      },
-    }),
-    typescript(),
-    prettier({ parser: 'typescript' }),
-  ],
-  context: 'this',
+type Subject = {
+  id: number;
+  name: string;
+};
+
+type NmSettings = {
+  bids_kopecks: BidsKopecks;
+  nm_id: number;
+  subject: Subject;
+};
+
+type Placements = {
+  recommendations: boolean;
+  search: boolean;
+};
+
+type Timestamps = {
+  created: string;
+  deleted: string;
+  started: string | null;
+  updated: string;
+};
+
+type AdvertSettings = {
+  name: string;
+  payment_type: 'cpm' | 'cpc';
+  placements: Placements;
+};
+
+type Advert = {
+  bid_type: 'manual' | 'unified';
+  id: number;
+  nm_settings: NmSettings[];
+  settings: AdvertSettings;
+  status: number;
+  timestamps: Timestamps;
 };

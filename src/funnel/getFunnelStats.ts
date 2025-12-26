@@ -28,29 +28,49 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import cleanup from 'rollup-plugin-cleanup';
-import license from 'rollup-plugin-license';
-import prettier from 'rollup-plugin-prettier';
-import typescript from 'rollup-plugin-typescript2';
-import { fileURLToPath } from 'url';
+import getApiKey from '../auth/getApiKey';
+import getCards from '../cards/getCards';
 
-export default {
-  input: 'src/index.ts',
-  output: {
-    dir: 'dist',
-    format: 'esm',
-  },
-  plugins: [
-    cleanup({ comments: 'none', extensions: ['.ts'] }),
-    license({
-      banner: {
-        content: {
-          file: fileURLToPath(new URL('license-header.txt', import.meta.url)),
+export default function (start: string, end: string): FunnelStats[] {
+  const allNmIds = getCards().map(card => card.nmID);
+  const allStats: FunnelStats[] = [];
+  const BATCH_SIZE = 20;
+
+  for (let i = 0; i < allNmIds.length; i += BATCH_SIZE) {
+    const batch = allNmIds.slice(i, i + BATCH_SIZE);
+
+    console.log(
+      `Батч ${Math.floor(i / BATCH_SIZE) + 1}: ${batch.length} товаров`
+    );
+
+    const response = UrlFetchApp.fetch(
+      'https://seller-analytics-api.wildberries.ru/api/analytics/v3/sales-funnel/products/history',
+      {
+        method: 'post',
+        headers: {
+          'Authorization': getApiKey(),
+          'Content-Type': 'application/json',
         },
-      },
-    }),
-    typescript(),
-    prettier({ parser: 'typescript' }),
-  ],
-  context: 'this',
-};
+        payload: JSON.stringify({
+          selectedPeriod: {
+            start: start,
+            end: end,
+          },
+          nmIds: batch,
+        }),
+        muteHttpExceptions: true,
+      }
+    );
+
+    const content = response.getContentText();
+
+    const batchStats: FunnelStats[] = JSON.parse(content);
+    allStats.push(...batchStats);
+
+    console.log(allStats);
+
+    Utilities.sleep(1000 * 20);
+  }
+
+  return allStats;
+}

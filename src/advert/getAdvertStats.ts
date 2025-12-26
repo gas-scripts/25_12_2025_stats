@@ -28,29 +28,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import cleanup from 'rollup-plugin-cleanup';
-import license from 'rollup-plugin-license';
-import prettier from 'rollup-plugin-prettier';
-import typescript from 'rollup-plugin-typescript2';
-import { fileURLToPath } from 'url';
+import getApiKey from '../auth/getApiKey';
+import getAdverts from './getAdverts';
 
-export default {
-  input: 'src/index.ts',
-  output: {
-    dir: 'dist',
-    format: 'esm',
-  },
-  plugins: [
-    cleanup({ comments: 'none', extensions: ['.ts'] }),
-    license({
-      banner: {
-        content: {
-          file: fileURLToPath(new URL('license-header.txt', import.meta.url)),
-        },
-      },
-    }),
-    typescript(),
-    prettier({ parser: 'typescript' }),
-  ],
-  context: 'this',
-};
+export default function (start: string, end: string): AdvertStats[] {
+  const advertIds = getAdverts().map(advert => advert.id);
+  const allStats: AdvertStats[] = [];
+  const BATCH_SIZE = 50;
+
+  for (let i = 0; i < advertIds.length; i += BATCH_SIZE) {
+    const batch = advertIds.slice(i, i + BATCH_SIZE);
+    console.log(
+      `FullStats батч ${Math.floor(i / BATCH_SIZE) + 1}: ${batch.length} advertId`
+    );
+
+    const response = UrlFetchApp.fetch(
+      `https://advert-api.wildberries.ru/adv/v3/fullstats?beginDate=${start}&endDate=${end}&ids=${batch.join(',')}`,
+      {
+        headers: {
+          Authorization: getApiKey(),
+        }
+      }
+    );
+
+    const content = response.getContentText();
+    const batchStats: AdvertStats[] = JSON.parse(content);
+
+    console.log(`FullStats ответ батча: ${batchStats.length} записей`);
+
+    allStats.push(...batchStats);
+  }
+
+  return allStats;
+}

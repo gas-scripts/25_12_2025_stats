@@ -28,29 +28,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import cleanup from 'rollup-plugin-cleanup';
-import license from 'rollup-plugin-license';
-import prettier from 'rollup-plugin-prettier';
-import typescript from 'rollup-plugin-typescript2';
-import { fileURLToPath } from 'url';
+import { STOCKS_SHEET_NAME } from '../sheets';
 
-export default {
-  input: 'src/index.ts',
-  output: {
-    dir: 'dist',
-    format: 'esm',
-  },
-  plugins: [
-    cleanup({ comments: 'none', extensions: ['.ts'] }),
-    license({
-      banner: {
-        content: {
-          file: fileURLToPath(new URL('license-header.txt', import.meta.url)),
-        },
-      },
-    }),
-    typescript(),
-    prettier({ parser: 'typescript' }),
-  ],
-  context: 'this',
-};
+export default function (stocks: Stock[]) {
+  const sheet =
+    SpreadsheetApp.getActiveSpreadsheet().getSheetByName(STOCKS_SHEET_NAME) ||
+    SpreadsheetApp.getActiveSpreadsheet().insertSheet(STOCKS_SHEET_NAME);
+
+  sheet.clear();
+
+  const headers = Object.keys(stocks[0]);
+
+  sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+  sheet
+    .getRange(2, 1, stocks.length, headers.length)
+    .setValues(
+      stocks.map(stock => headers.map(header => stock[header as keyof Stock]))
+    );
+}

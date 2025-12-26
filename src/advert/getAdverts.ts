@@ -28,29 +28,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import cleanup from 'rollup-plugin-cleanup';
-import license from 'rollup-plugin-license';
-import prettier from 'rollup-plugin-prettier';
-import typescript from 'rollup-plugin-typescript2';
-import { fileURLToPath } from 'url';
 
-export default {
-  input: 'src/index.ts',
-  output: {
-    dir: 'dist',
-    format: 'esm',
-  },
-  plugins: [
-    cleanup({ comments: 'none', extensions: ['.ts'] }),
-    license({
-      banner: {
-        content: {
-          file: fileURLToPath(new URL('license-header.txt', import.meta.url)),
-        },
+import getApiKey from '../auth/getApiKey';
+
+export default function getAdverts(): Advert[] {
+  const response = UrlFetchApp.fetch(
+    'https://advert-api.wildberries.ru/api/advert/v2/adverts?statuses=9,11',
+    {
+      headers: {
+        Authorization: getApiKey(),
       },
-    }),
-    typescript(),
-    prettier({ parser: 'typescript' }),
-  ],
-  context: 'this',
-};
+    }
+  );
+
+  const content = response.getContentText();
+  console.log(content);
+
+  return JSON.parse(content).adverts;
+}

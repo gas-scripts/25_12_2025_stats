@@ -28,29 +28,73 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import cleanup from 'rollup-plugin-cleanup';
-import license from 'rollup-plugin-license';
-import prettier from 'rollup-plugin-prettier';
-import typescript from 'rollup-plugin-typescript2';
-import { fileURLToPath } from 'url';
+type NmStats = {
+  atbs: number;
+  canceled: number;
+  clicks: number;
+  cpc: number;
+  cr: number;
+  ctr: number;
+  name: string;
+  nmId: number;
+  orders: number;
+  shks: number;
+  sum: number;
+  sum_price: number;
+  views: number;
+};
 
-export default {
-  input: 'src/index.ts',
-  output: {
-    dir: 'dist',
-    format: 'esm',
-  },
-  plugins: [
-    cleanup({ comments: 'none', extensions: ['.ts'] }),
-    license({
-      banner: {
-        content: {
-          file: fileURLToPath(new URL('license-header.txt', import.meta.url)),
-        },
-      },
-    }),
-    typescript(),
-    prettier({ parser: 'typescript' }),
-  ],
-  context: 'this',
+type AppStats = {
+  appType: number;
+  atbs: number;
+  canceled: number;
+  clicks: number;
+  cpc: number;
+  cr: number;
+  ctr: number;
+  nms: NmStats[];
+  orders: number;
+  shks: number;
+  sum: number;
+  sum_price: number;
+  views: number;
+};
+
+type DayStats = {
+  apps: AppStats[];
+  atbs: number;
+  canceled: number;
+  clicks: number;
+  cpc: number;
+  cr: number;
+  ctr: number;
+  date: string;
+  orders: number;
+  shks: number;
+  sum: number;
+  sum_price: number;
+  views: number;
+};
+
+type BoosterStats = {
+  avg_position: number;
+  date: string;
+  nm: number;
+};
+
+type AdvertStats = {
+  advertId: number;
+  atbs: number;
+  boosterStats: BoosterStats[];
+  canceled: number;
+  clicks: number;
+  cpc: number;
+  cr: number;
+  ctr: number;
+  days: DayStats[];
+  orders: number;
+  shks: number;
+  sum: number;
+  sum_price: number;
+  views: number;
 };
