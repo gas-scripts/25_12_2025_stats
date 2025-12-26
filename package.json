@@ -1,7 +1,7 @@
 {
   "name": "25-12-2025-stats",
-  "version": "0.0.0",
-  "description": "",
+  "version": "1.0.0",
+  "description": "Интеграция Wildberries для Google Sheets",
   "main": "build/index.js",
   "license": "Apache-2.0",
   "keywords": [],
