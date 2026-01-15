@@ -24,7 +24,14 @@ import getSales from './sales/getSales';
 import writeSales from './sales/writeSales';
 import getStocks from './stocks/getStocks';
 import writeStocks from './stocks/writeStocks';
-import { ADVERT_SHEET_NAME, FUNNEL_SHEET_NAME, ORDERS_SHEET_NAME, SALES_SHEET_NAME, SETTINGS_SHEET_NAME, STOCKS_SHEET_NAME } from './sheets';
+import {
+  ADVERT_SHEET_NAME,
+  FUNNEL_SHEET_NAME,
+  ORDERS_SHEET_NAME,
+  SALES_SHEET_NAME,
+  SETTINGS_SHEET_NAME,
+  STOCKS_SHEET_NAME,
+} from './sheets';
 
 const VALUE_COLUMN = 2;
 const START_DATE_ROW = 5;
@@ -146,29 +153,53 @@ function onOpen() {
 }
 
 function menuUpdateStocks() {
-  updateStocks(STOCKS_SHEET_NAME + "(Ручной вызов)");
+  const sheetName = STOCKS_SHEET_NAME + '(Ручной вызов)';
+
+  if (isSheetClearEnabled())
+    SpreadsheetApp.getActive().getSheetByName(sheetName)?.clear();
+  updateStocks(sheetName);
 }
 
 function menuLoadOrders() {
+  const sheetName = ORDERS_SHEET_NAME + '(Ручной вызов)';
+
+  if (isSheetClearEnabled())
+    SpreadsheetApp.getActive().getSheetByName(sheetName)?.clear();
+
   const date = getStartDateFromSettings();
-  loadOrders(date, ORDERS_SHEET_NAME + "(Ручной вызов)");
+  loadOrders(date, sheetName);
 }
 
 function menuLoadSales() {
+  const sheetName = SALES_SHEET_NAME + '(Ручной вызов)';
+
+  if (isSheetClearEnabled())
+    SpreadsheetApp.getActive().getSheetByName(sheetName)?.clear();
+
   const date = getStartDateFromSettings();
-  loadSales(date, SALES_SHEET_NAME + "(Ручной вызов)");
+  loadSales(date, sheetName);
 }
 
 function menuLoadFunnelStats() {
+  const sheetName = FUNNEL_SHEET_NAME + '(Ручной вызов)';
+
+  if (isSheetClearEnabled())
+    SpreadsheetApp.getActive().getSheetByName(sheetName)?.clear();
+
   const start = getStartDateFromSettings();
   const end = getEndDateFromSettings();
-  loadFunnelStats(start, end, FUNNEL_SHEET_NAME + "(Ручной вызов)");
+  loadFunnelStats(start, end, sheetName);
 }
 
 function menuLoadAdvertStats() {
+  const sheetName = ADVERT_SHEET_NAME + '(Ручной вызов)';
+
+  if (isSheetClearEnabled())
+    SpreadsheetApp.getActive().getSheetByName(sheetName)?.clear();
+
   const start = getStartDateFromSettings();
   const end = getEndDateFromSettings();
-  loadAdvertStats(start, end, ADVERT_SHEET_NAME + "(Ручной вызов)");
+  loadAdvertStats(start, end, sheetName);
 }
 
 function menuSetupDailyTrigger() {
@@ -218,6 +249,13 @@ function isAutoRunEnabled() {
   const sheet = getSettingsSheet();
   if (!sheet) return false;
   const value = sheet.getRange(4, VALUE_COLUMN).getValue();
+  return !!value;
+}
+
+function isSheetClearEnabled() {
+  const sheet = getSettingsSheet();
+  if (!sheet) return false;
+  const value = sheet.getRange(7, VALUE_COLUMN).getValue();
   return !!value;
 }
 
@@ -297,6 +335,7 @@ function createSettingsSheet() {
     ['Включить автозапуск ежедневный', false],
     ['Дата начала периода', '2025-12-20'],
     ['Дата конца периода', '2025-12-25'],
+    ['Очищать лист при ручном запуске', false],
   ];
 
   // Добавляем данные
@@ -328,7 +367,10 @@ function createSettingsSheet() {
   valueColumn.setBackground('#FFFFFF');
 
   // Чекбокс для автозапуска (строка 4, колонна 2)
-  const checkboxRange = sheet.getRange(4, 2);
+  let checkboxRange = sheet.getRange(4, 2);
+  checkboxRange.insertCheckboxes();
+
+  checkboxRange = sheet.getRange(7, 2);
   checkboxRange.insertCheckboxes();
 
   // Форматирование дат
