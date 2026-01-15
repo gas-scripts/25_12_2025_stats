@@ -30,12 +30,12 @@
  */
 import { FUNNEL_SHEET_NAME } from '../sheets';
 
-export default function (funnelStats: FunnelStats[]) {
+export default function (funnelStats: FunnelStats[], sheetName = FUNNEL_SHEET_NAME) {
   const sheet =
     SpreadsheetApp.getActiveSpreadsheet().getSheetByName(
-      FUNNEL_SHEET_NAME
+      sheetName
     ) ||
-    SpreadsheetApp.getActiveSpreadsheet().insertSheet(FUNNEL_SHEET_NAME);
+    SpreadsheetApp.getActiveSpreadsheet().insertSheet(sheetName);
 
   const normalizedFunnelStats = normalizeFunnelStats(funnelStats);
 

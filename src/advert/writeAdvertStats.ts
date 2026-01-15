@@ -30,10 +30,13 @@
  */
 import { ADVERT_SHEET_NAME } from '../sheets';
 
-export default function writeAdvertStatsToSheet(advertStats: any[]) {
+export default function writeAdvertStatsToSheet(
+  advertStats: any[],
+  sheetName = ADVERT_SHEET_NAME
+) {
   const sheet =
-    SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ADVERT_SHEET_NAME) ||
-    SpreadsheetApp.getActiveSpreadsheet().insertSheet(ADVERT_SHEET_NAME);
+    SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName) ||
+    SpreadsheetApp.getActiveSpreadsheet().insertSheet(sheetName);
 
   const normalizedAdvertStats = normalizeAdvertStats(advertStats);
 
@@ -50,12 +53,18 @@ export default function writeAdvertStatsToSheet(advertStats: any[]) {
 
   sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
   sheet
-    .getRange(sheet.getLastRow() + 1, 1, normalizedAdvertStats.length, headers.length)
+    .getRange(
+      sheet.getLastRow() + 1,
+      1,
+      normalizedAdvertStats.length,
+      headers.length
+    )
     .setValues(
-      normalizedAdvertStats.map(stat => headers.map(header => stat[header as keyof typeof stat]))
+      normalizedAdvertStats.map(stat =>
+        headers.map(header => stat[header as keyof typeof stat])
+      )
     );
 }
-
 
 function normalizeAdvertStats(stats: AdvertStats[]) {
   return stats.flatMap(advert =>

@@ -30,10 +30,10 @@
  */
 import { STOCKS_SHEET_NAME } from '../sheets';
 
-export default function (stocks: Stock[]) {
+export default function (stocks: Stock[], sheetName = STOCKS_SHEET_NAME) {
   const sheet =
-    SpreadsheetApp.getActiveSpreadsheet().getSheetByName(STOCKS_SHEET_NAME) ||
-    SpreadsheetApp.getActiveSpreadsheet().insertSheet(STOCKS_SHEET_NAME);
+    SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName) ||
+    SpreadsheetApp.getActiveSpreadsheet().insertSheet(sheetName);
 
   sheet.clear();
 

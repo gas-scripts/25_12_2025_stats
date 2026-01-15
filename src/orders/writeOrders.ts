@@ -30,10 +30,10 @@
  */
 import { ORDERS_SHEET_NAME } from '../sheets';
 
-export default function (orders: Order[]) {
+export default function (orders: Order[], sheetName = ORDERS_SHEET_NAME) {
   const sheet =
-    SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ORDERS_SHEET_NAME) ||
-    SpreadsheetApp.getActiveSpreadsheet().insertSheet(ORDERS_SHEET_NAME);
+    SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName) ||
+    SpreadsheetApp.getActiveSpreadsheet().insertSheet(sheetName);
 
   let headers: string[] = [];
 

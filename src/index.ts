@@ -13,21 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/**
- * Copyright 2025 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import getAdvertStats from './advert/getAdvertStats';
 import writeAdvertStatsToSheet from './advert/writeAdvertStats';
 import getCards from './cards/getCards';
@@ -39,37 +24,37 @@ import getSales from './sales/getSales';
 import writeSales from './sales/writeSales';
 import getStocks from './stocks/getStocks';
 import writeStocks from './stocks/writeStocks';
-import { SETTINGS_SHEET_NAME } from './sheets';
+import { ADVERT_SHEET_NAME, FUNNEL_SHEET_NAME, ORDERS_SHEET_NAME, SALES_SHEET_NAME, SETTINGS_SHEET_NAME, STOCKS_SHEET_NAME } from './sheets';
 
 const VALUE_COLUMN = 2;
 const START_DATE_ROW = 5;
 const END_DATE_ROW = 6;
 
-function updateStocks() {
+function updateStocks(sheetName?: string) {
   const stocks = getStocks();
-  writeStocks(stocks);
+  writeStocks(stocks, sheetName);
 }
 
-function loadOrders(date: string) {
+function loadOrders(date: string, sheetName?: string) {
   let orders = getOrders();
   orders = orders.filter(order => order.date.startsWith(date));
-  writeOrders(orders);
+  writeOrders(orders, sheetName);
 }
 
-function loadSales(date: string) {
+function loadSales(date: string, sheetName?: string) {
   let sales = getSales();
   sales = sales.filter(sale => sale.date.startsWith(date));
-  writeSales(sales);
+  writeSales(sales, sheetName);
 }
 
-function loadFunnelStats(start: string, end: string) {
+function loadFunnelStats(start: string, end: string, sheetName?: string) {
   const funnelStats = getFunnelStats(start, end);
-  writeFunnelStats(funnelStats);
+  writeFunnelStats(funnelStats, sheetName);
 }
 
-function loadAdvertStats(start: string, end: string) {
+function loadAdvertStats(start: string, end: string, sheetName?: string) {
   const advertStats = getAdvertStats(start, end);
-  writeAdvertStatsToSheet(advertStats);
+  writeAdvertStatsToSheet(advertStats, sheetName);
 }
 
 function getSettingsSheet() {
@@ -152,44 +137,50 @@ function onOpen() {
     .addItem('🔑 Обновить API ключ', 'menuUpdateApiKey');
 
   if (!triggerEnabled) {
-    menu.addSeparator().addItem('📅 Установить ежедневный запуск', 'menuSetupDailyTrigger');
+    menu
+      .addSeparator()
+      .addItem('📅 Установить ежедневный запуск', 'menuSetupDailyTrigger');
   }
 
   menu.addToUi();
 }
 
 function menuUpdateStocks() {
-  updateStocks();
+  updateStocks(STOCKS_SHEET_NAME + "(Ручной вызов)");
 }
 
 function menuLoadOrders() {
   const date = getStartDateFromSettings();
-  loadOrders(date);
+  loadOrders(date, ORDERS_SHEET_NAME + "(Ручной вызов)");
 }
 
 function menuLoadSales() {
   const date = getStartDateFromSettings();
-  loadSales(date);
+  loadSales(date, SALES_SHEET_NAME + "(Ручной вызов)");
 }
 
 function menuLoadFunnelStats() {
   const start = getStartDateFromSettings();
   const end = getEndDateFromSettings();
-  loadFunnelStats(start, end);
+  loadFunnelStats(start, end, FUNNEL_SHEET_NAME + "(Ручной вызов)");
 }
 
 function menuLoadAdvertStats() {
   const start = getStartDateFromSettings();
   const end = getEndDateFromSettings();
-  loadAdvertStats(start, end);
+  loadAdvertStats(start, end, ADVERT_SHEET_NAME + "(Ручной вызов)");
 }
 
 function menuSetupDailyTrigger() {
   const handler = 'dailyAutoRun';
   const triggers = ScriptApp.getProjectTriggers();
-  const triggerAlreadyExists = triggers.some(t => t.getHandlerFunction() === handler);
+  const triggerAlreadyExists = triggers.some(
+    t => t.getHandlerFunction() === handler
+  );
   if (triggerAlreadyExists) {
-    SpreadsheetApp.getUi().alert('Ежедневный запуск уже установлен на 4:00 утра');
+    SpreadsheetApp.getUi().alert(
+      'Ежедневный запуск уже установлен на 4:00 утра'
+    );
     return;
   }
   setupDailyTrigger();
@@ -198,12 +189,15 @@ function menuSetupDailyTrigger() {
 
 function menuUpdateApiKey() {
   const ui = SpreadsheetApp.getUi();
-  const response = ui.prompt('Введите ваш API ключ Wildberries:', ui.ButtonSet.OK_CANCEL);
-  
+  const response = ui.prompt(
+    'Введите ваш API ключ Wildberries:',
+    ui.ButtonSet.OK_CANCEL
+  );
+
   if (response.getSelectedButton() === ui.Button.CANCEL) {
     return;
   }
-  
+
   if (response.getSelectedButton() === ui.Button.OK) {
     const apiKey = response.getResponseText().trim();
     if (apiKey) {
