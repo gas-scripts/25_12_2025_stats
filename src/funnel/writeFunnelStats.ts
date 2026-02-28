@@ -29,6 +29,7 @@
  * limitations under the License.
  */
 import { FUNNEL_SHEET_NAME } from '../sheets';
+import { hasSameHeaders, splitDateTimeColumns } from '../utils/splitDateTimeColumns';
 
 export default function (funnelStats: FunnelStats[], sheetName = FUNNEL_SHEET_NAME) {
   const sheet =
@@ -37,24 +38,26 @@ export default function (funnelStats: FunnelStats[], sheetName = FUNNEL_SHEET_NA
     ) ||
     SpreadsheetApp.getActiveSpreadsheet().insertSheet(sheetName);
 
-  const normalizedFunnelStats = normalizeFunnelStats(funnelStats);
+  const normalizedFunnelStats = splitDateTimeColumns(normalizeFunnelStats(funnelStats));
+  if (!normalizedFunnelStats.length) return;
 
+  const nextHeaders = Object.keys(normalizedFunnelStats[0]);
   let headers: string[] = [];
 
   if (sheet.getLastColumn() > 0)
     headers = sheet
       .getRange(1, 1, 1, sheet.getLastColumn())
       .getValues()[0] as string[];
-  if (!headers[0] || typeof headers[0] !== 'string') {
+  if (!headers[0] || !hasSameHeaders(headers, nextHeaders)) {
     sheet.clear();
-    headers = Object.keys(normalizedFunnelStats[0]);
+    headers = nextHeaders;
   }
 
   sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
   sheet
     .getRange(sheet.getLastRow() + 1, 1, normalizedFunnelStats.length, headers.length)
     .setValues(
-      normalizedFunnelStats.map(stat => headers.map(header => stat[header as keyof typeof stat]))
+      normalizedFunnelStats.map(stat => headers.map(header => stat[header]))
     );
 }
 
