@@ -29,20 +29,22 @@
  * limitations under the License.
  */
 import { STOCKS_SHEET_NAME } from '../sheets';
+import { splitDateTimeColumns } from '../utils/splitDateTimeColumns';
 
 export default function (stocks: Stock[], sheetName = STOCKS_SHEET_NAME) {
+  if (!stocks.length) return;
+
+  const normalizedStocks = splitDateTimeColumns(stocks);
   const sheet =
     SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName) ||
     SpreadsheetApp.getActiveSpreadsheet().insertSheet(sheetName);
 
   sheet.clear();
 
-  const headers = Object.keys(stocks[0]);
+  const headers = Object.keys(normalizedStocks[0]);
 
   sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
   sheet
-    .getRange(2, 1, stocks.length, headers.length)
-    .setValues(
-      stocks.map(stock => headers.map(header => stock[header as keyof Stock]))
-    );
+    .getRange(2, 1, normalizedStocks.length, headers.length)
+    .setValues(normalizedStocks.map(stock => headers.map(header => stock[header])));
 }

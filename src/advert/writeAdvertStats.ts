@@ -29,6 +29,7 @@
  * limitations under the License.
  */
 import { ADVERT_SHEET_NAME } from '../sheets';
+import { hasSameHeaders, splitDateTimeColumns } from '../utils/splitDateTimeColumns';
 
 export default function writeAdvertStatsToSheet(
   advertStats: any[],
@@ -38,17 +39,19 @@ export default function writeAdvertStatsToSheet(
     SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName) ||
     SpreadsheetApp.getActiveSpreadsheet().insertSheet(sheetName);
 
-  const normalizedAdvertStats = normalizeAdvertStats(advertStats);
+  const normalizedAdvertStats = splitDateTimeColumns(normalizeAdvertStats(advertStats));
+  if (!normalizedAdvertStats.length) return;
 
+  const nextHeaders = Object.keys(normalizedAdvertStats[0]);
   let headers: string[] = [];
 
   if (sheet.getLastColumn() > 0)
     headers = sheet
       .getRange(1, 1, 1, sheet.getLastColumn())
       .getValues()[0] as string[];
-  if (!headers[0] || typeof headers[0] !== 'string') {
+  if (!headers[0] || !hasSameHeaders(headers, nextHeaders)) {
     sheet.clear();
-    headers = Object.keys(normalizedAdvertStats[0]);
+    headers = nextHeaders;
   }
 
   sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
@@ -61,7 +64,7 @@ export default function writeAdvertStatsToSheet(
     )
     .setValues(
       normalizedAdvertStats.map(stat =>
-        headers.map(header => stat[header as keyof typeof stat])
+        headers.map(header => stat[header])
       )
     );
 }

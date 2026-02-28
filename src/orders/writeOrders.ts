@@ -29,27 +29,32 @@
  * limitations under the License.
  */
 import { ORDERS_SHEET_NAME } from '../sheets';
+import { hasSameHeaders, splitDateTimeColumns } from '../utils/splitDateTimeColumns';
 
 export default function (orders: Order[], sheetName = ORDERS_SHEET_NAME) {
+  if (!orders.length) return;
+
+  const normalizedOrders = splitDateTimeColumns(orders);
+  const nextHeaders = Object.keys(normalizedOrders[0]);
   const sheet =
     SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName) ||
     SpreadsheetApp.getActiveSpreadsheet().insertSheet(sheetName);
 
   let headers: string[] = [];
 
-  if (sheet.getLastColumn() > 0)
+  if (sheet.getLastColumn() > 0) {
     headers = sheet
       .getRange(1, 1, 1, sheet.getLastColumn())
       .getValues()[0] as string[];
-  if (!headers[0] || typeof headers[0] !== 'string') {
+  }
+
+  if (!headers[0] || !hasSameHeaders(headers, nextHeaders)) {
     sheet.clear();
-    headers = Object.keys(orders[0]);
+    headers = nextHeaders;
   }
 
   sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
   sheet
-    .getRange(sheet.getLastRow() + 1, 1, orders.length, headers.length)
-    .setValues(
-      orders.map(order => headers.map(header => order[header as keyof Order]))
-    );
+    .getRange(sheet.getLastRow() + 1, 1, normalizedOrders.length, headers.length)
+    .setValues(normalizedOrders.map(order => headers.map(header => order[header])));
 }
